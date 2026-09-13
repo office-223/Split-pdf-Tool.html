@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>4 x 6 Label PDF Splitter</title>
+  <meta name="description" content="Split every PDF page into two separate 4 x 6 inch label pages." />
+  <style>
+    :root{--bg:#f6f8fc;--card:#fff;--text:#171923;--muted:#667085;--line:#e4e7ec;--blue:#2563eb;--blue2:#1d4ed8;--good:#067647;--bad:#b42318}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#eef4ff,#f8fafc 38%,#f6f8fc);color:var(--text)}
+    .wrap{width:min(960px,calc(100% - 28px));margin:auto;padding:38px 0 60px}.hero{text-align:center;margin-bottom:22px}.pill{display:inline-block;padding:7px 11px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-weight:800;font-size:13px;border:1px solid #bfdbfe}.hero h1{font-size:clamp(32px,6vw,52px);line-height:1.02;letter-spacing:-.04em;margin:15px 0 10px}.hero p{max-width:690px;margin:auto;color:var(--muted);line-height:1.6;font-size:17px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(16,24,40,.08);padding:22px}.drop{display:block;border:2px dashed #b9c6dc;border-radius:17px;padding:34px 18px;text-align:center;background:#fbfdff;cursor:pointer}.drop.drag{border-color:var(--blue);background:#eff6ff}.drop b{display:block;font-size:19px;margin-top:7px}.drop small{display:block;color:var(--muted);margin-top:5px}input[type=file]{display:none}
+    .locked{margin-top:16px;padding:13px 15px;border-radius:13px;background:#ecfdf3;color:#065f46;font-weight:800;text-align:center}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.field{border:1px solid var(--line);border-radius:13px;padding:13px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}.field select{width:100%;border:0;background:transparent;font-size:15px;outline:0}.row{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:17px}button{border:0;border-radius:13px;padding:13px 18px;font-size:15px;font-weight:800;cursor:pointer}.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue2)}.primary:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#f2f4f7;color:#344054}.fileinfo{flex:1;min-width:220px;color:#475467;font-size:14px}.status{display:none;margin-top:16px;padding:13px 15px;border-radius:13px;font-size:14px}.status.show{display:block}.work{background:#eff6ff;color:#1e40af}.good{background:#ecfdf3;color:var(--good)}.bad{background:#fef3f2;color:var(--bad)}.note{color:var(--muted);font-size:13px;line-height:1.55;margin-top:15px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}.step{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px}.n{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#eff6ff;color:#1d4ed8;font-weight:900;margin-bottom:9px}.step b{display:block;margin-bottom:4px}.step p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}.privacy{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}@media(max-width:720px){.grid,.steps{grid-template-columns:1fr}.wrap{padding-top:24px}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div class="pill">EXACT 4 x 6 INCH OUTPUT</div>
+    <h1>Split PDF Into 4 x 6 Labels</h1>
+    <p>Choose <b>2-label split</b> or <b>4-label split</b>. Every output label page is exactly <b>4 x 6 inches</b>, ready for thermal label printers.</p>
+  </section>
+
+  <section class="card">
+    <label class="drop" id="drop" for="file"><div style="font-size:42px">📄</div><b>Choose a PDF or drag it here</b><small>The PDF stays on your device and is processed in your browser.</small></label>
+    <input id="file" type="file" accept="application/pdf,.pdf" />
+    <div class="locked">Output page size locked to 4 x 6 inches (288 x 432 PDF points)</div>
+
+    <div class="grid">
+      <div class="field"><label>Split</label><select id="direction"><option value="horizontal">Top / Bottom</option><option value="vertical">Left / Right</option></select></div>
+      <div class="field"><label>Rotate</label><select id="rotation"><option value="270">270° (recommended)</option><option value="90">90°</option><option value="0">0°</option><option value="180">180°</option></select></div>
+      <div class="field"><label>Order</label><select id="order"><option value="first-second">First half, second half</option><option value="second-first">Second half, first half</option></select></div>
+    </div>
+
+    <div class="row"><button id="split" class="primary" disabled>Split 2 Labels → 4 x 6</button><button id="split4" class="primary" disabled>Split 4 Labels → 4 x 6</button><button id="reset" class="secondary">Reset</button><div id="fileinfo" class="fileinfo">No PDF selected</div></div>
+    <div id="status" class="status"></div>
+    <div class="note"><b>2-label button:</b> uses the selected Top / Bottom or Left / Right split. <b>4-label button:</b> divides every source page into a 2 × 2 grid (top-left, top-right, bottom-left, bottom-right). All pieces are scaled proportionally to fit inside 4 x 6 without cutting barcodes or text. For the FBA PDFs you showed, use <b>270°</b> rotation.</div>
+  </section>
+
+  <section class="steps"><div class="step"><div class="n">1</div><b>Upload</b><p>Select your A4 label PDF.</p></div><div class="step"><div class="n">2</div><b>Choose 2 or 4 labels</b><p>Split each source page into 2 halves or 4 quadrants.</p></div><div class="step"><div class="n">3</div><b>Print</b><p>The downloaded PDF uses exact 4 x 6 inch pages.</p></div></section>
+  <div class="privacy">For printing, choose paper size 4 x 6 in / 100 x 150 mm and use 100% / Actual Size.</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+const fileInput=document.getElementById('file'),drop=document.getElementById('drop'),splitBtn=document.getElementById('split'),split4Btn=document.getElementById('split4'),resetBtn=document.getElementById('reset'),fileinfo=document.getElementById('fileinfo'),status=document.getElementById('status');let selected=null;
+function stat(t,type='work'){status.className='status show '+type;status.textContent=t}function clearStat(){status.className='status';status.textContent=''}
+function setButtons(enabled){splitBtn.disabled=!enabled;split4Btn.disabled=!enabled}
+function useFile(f){clearStat();if(!f||(!f.name.toLowerCase().endsWith('.pdf')&&f.type!=='application/pdf')){selected=null;setButtons(false);fileinfo.textContent='No PDF selected';if(f)stat('Please select a PDF file.','bad');return}selected=f;setButtons(true);fileinfo.textContent=f.name+' • '+(f.size/1024/1024).toFixed(2)+' MB'}
+fileInput.addEventListener('change',e=>useFile(e.target.files[0]));['dragenter','dragover'].forEach(x=>drop.addEventListener(x,e=>{e.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(x=>drop.addEventListener(x,e=>{e.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>useFile(e.dataTransfer.files[0]));resetBtn.addEventListener('click',()=>{selected=null;fileInput.value='';setButtons(false);fileinfo.textContent='No PDF selected';clearStat()});
+
+async function make4x6(mode){
+  if(!selected)return;
+  setButtons(false);
+  try{
+    stat('Opening PDF…');
+    const srcBytes=await selected.arrayBuffer();
+    const src=await PDFLib.PDFDocument.load(srcBytes);
+    const out=await PDFLib.PDFDocument.create();
+    const total=src.getPageCount();
+    const direction=document.getElementById('direction').value;
+    const rotation=+document.getElementById('rotation').value;
+    const order=document.getElementById('order').value;
+    const PAGE_W=4*72, PAGE_H=6*72, MARGIN=6;
+
+    for(let i=0;i<total;i++){
+      const page=src.getPage(i),{width,height}=page.getSize();
+      let boxes;
+      if(mode===4){
+        boxes=[
+          {left:0,bottom:height/2,right:width/2,top:height},
+          {left:width/2,bottom:height/2,right:width,top:height},
+          {left:0,bottom:0,right:width/2,top:height/2},
+          {left:width/2,bottom:0,right:width,top:height/2}
+        ];
+        if(order==='second-first') boxes=boxes.slice().reverse();
+      }else{
+        boxes=direction==='horizontal'
+          ?[{left:0,bottom:height/2,right:width,top:height},{left:0,bottom:0,right:width,top:height/2}]
+          :[{left:0,bottom:0,right:width/2,top:height},{left:width/2,bottom:0,right:width,top:height}];
+        if(order==='second-first')boxes=[boxes[1],boxes[0]];
+      }
+
+      for(const box of boxes){
+        const emb=await out.embedPage(page,box);
+        const cw=box.right-box.left,ch=box.top-box.bottom;
+        const turned=rotation===90||rotation===270;
+        const rw=turned?ch:cw,rh=turned?cw:ch;
+        const scale=Math.min((PAGE_W-2*MARGIN)/rw,(PAGE_H-2*MARGIN)/rh);
+        const sw=cw*scale,sh=ch*scale,srw=rw*scale,srh=rh*scale;
+        const ox=(PAGE_W-srw)/2,oy=(PAGE_H-srh)/2;
+        const p=out.addPage([PAGE_W,PAGE_H]);
+        if(rotation===0)p.drawPage(emb,{x:ox,y:oy,width:sw,height:sh});
+        else if(rotation===90)p.drawPage(emb,{x:ox+srw,y:oy,width:sw,height:sh,rotate:PDFLib.degrees(90)});
+        else if(rotation===180)p.drawPage(emb,{x:ox+srw,y:oy+srh,width:sw,height:sh,rotate:PDFLib.degrees(180)});
+        else p.drawPage(emb,{x:ox,y:oy+srh,width:sw,height:sh,rotate:PDFLib.degrees(270)});
+      }
+      stat('Processing page '+(i+1)+' of '+total+'…');
+      await new Promise(r=>setTimeout(r,0));
+    }
+
+    const bytes=await out.save();
+    const blob=new Blob([bytes],{type:'application/pdf'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=selected.name.replace(/\.pdf$/i,'')+(mode===4?'_4x6_split_4_labels.pdf':'_4x6_split_2_labels.pdf');
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    stat('Done. '+total+' source pages became '+(total*mode)+' labels, each exactly 4 x 6 inches.','good');
+  }catch(e){
+    console.error(e);stat('Could not process this PDF. Try Chrome or Edge.','bad');
+  }finally{setButtons(!!selected)}
+}
+
+splitBtn.addEventListener('click',()=>make4x6(2));
+split4Btn.addEventListener('click',()=>make4x6(4));
+</script>
+</body>
+</html>
